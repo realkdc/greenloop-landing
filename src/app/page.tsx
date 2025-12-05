@@ -81,7 +81,7 @@ export default function LandingPage() {
     setMobileMenuOpen(false);
   };
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
     setMobileMenuOpen(false);
   };
