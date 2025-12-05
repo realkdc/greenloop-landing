@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { getRedisClient } from '@/lib/redis';
 
 export async function POST(request: NextRequest) {
   let body: { name?: string; email?: string } = {};
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store in Vercel KV
+    // Store in Redis
     const timestamp = new Date().toISOString();
     const leadId = `lead:${Date.now()}:${email}`;
     
@@ -37,14 +37,17 @@ export async function POST(request: NextRequest) {
       status: 'new'
     };
 
-    // Store the lead data
-    await kv.set(leadId, leadData);
+    // Get Redis client
+    const redis = await getRedisClient();
+    
+    // Store the lead data (Redis needs JSON stringified)
+    await redis.set(leadId, JSON.stringify(leadData));
     
     // Also add to a list for easy retrieval
-    await kv.lpush('leads:list', leadId);
+    await redis.lPush('leads:list', leadId);
 
     // Set expiration (keeps data for 1 year)
-    await kv.expire(leadId, 31536000);
+    await redis.expire(leadId, 31536000);
 
     // Optional: Send Discord/Slack webhook notification
     if (process.env.DISCORD_WEBHOOK_URL) {
@@ -71,10 +74,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error submitting lead:', error);
     
-    // If KV is not configured, log and still return success
+    // If Redis is not configured, log and still return success
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    if (errorMessage.includes('KV') || errorMessage.includes('REDIS')) {
-      console.log('KV not configured - lead data:', { name: body?.name, email: body?.email, timestamp: new Date().toISOString() });
+    if (errorMessage.includes('REDIS') || errorMessage.includes('Connection') || errorMessage.includes('ENV')) {
+      console.log('Redis not configured - lead data:', { name: body?.name, email: body?.email, timestamp: new Date().toISOString() });
       // Still return success so user experience isn't broken
       return NextResponse.json(
         { 

@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { getRedisClient } from '@/lib/redis';
 
 export async function GET() {
   try {
+    const redis = await getRedisClient();
+    
     // Get all lead IDs from the list
-    const leadIds = await kv.lrange('leads:list', 0, -1) as string[];
+    const leadIds = await redis.lRange('leads:list', 0, -1);
     
     if (!leadIds || leadIds.length === 0) {
       return NextResponse.json({ leads: [] });
@@ -13,8 +15,16 @@ export async function GET() {
     // Fetch all lead data
     const leads = await Promise.all(
       leadIds.map(async (id) => {
-        const leadData = await kv.get(id);
-        return leadData ? { id, ...leadData as object } : null;
+        const leadDataStr = await redis.get(id);
+        if (leadDataStr) {
+          try {
+            const leadData = JSON.parse(leadDataStr);
+            return { id, ...leadData };
+          } catch {
+            return null;
+          }
+        }
+        return null;
       })
     );
 
@@ -31,11 +41,11 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching leads:', error);
     
-    // If KV is not configured, return empty array
-    if (error instanceof Error && error.message.includes('KV')) {
+    // If Redis is not configured, return empty array
+    if (error instanceof Error && (error.message.includes('REDIS') || error.message.includes('Connection'))) {
       return NextResponse.json({ 
         leads: [],
-        message: 'KV database not configured yet. Set up Vercel KV to store leads.'
+        message: 'Redis database not connected yet. Connect the database in Vercel dashboard.'
       });
     }
     
