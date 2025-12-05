@@ -10,57 +10,125 @@ function cn(...inputs: ClassValue[]) {
 }
 
 function LeadCaptureModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
+
   if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/submit-lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSuccess(true);
+        setName('');
+        setEmail('');
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setIsSuccess(false);
+          onClose();
+        }, 2000);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200 relative">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10"
         >
           <X className="h-6 w-6" />
         </button>
         
-        <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-4">
-            <Sparkles className="h-6 w-6" />
+        {isSuccess ? (
+          <div className="text-center py-8">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-4">
+              <CheckCircle2 className="h-8 w-8" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Success!</h3>
+            <p className="text-slate-600">We'll send you the agreement shortly.</p>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900">Start the Recovery</h3>
-          <p className="text-slate-600 mt-2">We'll send you the agreement to fix your repeat revenue.</p>
-        </div>
+        ) : (
+          <>
+            <div className="text-center mb-8">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900">Start the Recovery</h3>
+              <p className="text-slate-600 mt-2">We'll send you the agreement to fix your repeat revenue.</p>
+            </div>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input 
-              type="text" 
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
-              placeholder="John Doe"
-              autoFocus
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input 
-              type="email" 
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
-              placeholder="john@restaurant.com"
-            />
-          </div>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                  placeholder="John Doe"
+                  required
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                  placeholder="john@restaurant.com"
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
 
-          <button 
-            type="submit"
-            className="w-full rounded-lg bg-emerald-600 px-6 py-4 text-lg font-bold text-white hover:bg-emerald-700 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] mt-4"
-          >
-            Send Me the Agreement
-          </button>
-          
-          <p className="text-xs text-center text-slate-400 mt-4">
-            No demo required. Simple agreement.
-          </p>
-        </form>
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-lg bg-emerald-600 px-6 py-4 text-lg font-bold text-white hover:bg-emerald-700 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {isSubmitting ? 'Sending...' : 'Send Me the Agreement'}
+              </button>
+              
+              <p className="text-xs text-center text-slate-400 mt-4">
+                No demo required. Simple agreement.
+              </p>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
