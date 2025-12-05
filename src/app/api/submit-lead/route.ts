@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
+import { sendLeadNotification } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,14 @@ export async function POST(request: NextRequest) {
 
     // Set expiration (optional - keeps data for 1 year)
     await kv.expire(leadId, 31536000); // 1 year in seconds
+
+    // Send email notifications (non-blocking - won't fail the request if email fails)
+    try {
+      await sendLeadNotification(leadData);
+    } catch (emailError) {
+      console.error('Email notification failed (but lead was saved):', emailError);
+      // Continue even if email fails - lead is already saved
+    }
 
     return NextResponse.json(
       { 
