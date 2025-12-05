@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Calculator, ArrowRight, CheckCircle2, TrendingUp, Users, DollarSign, BarChart3, AlertCircle, Menu, X, ExternalLink, Sparkles, Info } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -16,6 +16,17 @@ function LeadCaptureModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setName('');
+      setEmail('');
+      setError('');
+      setIsSuccess(false);
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,13 +34,31 @@ function LeadCaptureModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
     setIsSubmitting(true);
     setError('');
 
+    // Trim and validate client-side
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName || !trimmedEmail) {
+      setError('Please fill in all fields.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Please enter a valid email address.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/submit-lead', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name: trimmedName, email: trimmedEmail }),
       });
 
       const data = await response.json();
@@ -117,7 +146,7 @@ function LeadCaptureModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
               <button 
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !name.trim() || !email.trim()}
                 className="w-full rounded-lg bg-emerald-600 px-6 py-4 text-lg font-bold text-white hover:bg-emerald-700 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 {isSubmitting ? 'Sending...' : 'Send Me the Agreement'}
