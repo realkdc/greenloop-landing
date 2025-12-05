@@ -670,11 +670,16 @@ function RevenueCalculator({ onFixNowClick }: { onFixNowClick?: () => void }) {
     const reactivatableCustomers = nonReturningCustomers * reactivationRate;
     reactivationLoss = reactivatableCustomers * inputs.ticketSize * 1.5; // 1.5x monthly visits once reactivated
     
-    // 3. LOYALTY PROGRAM INEFFICIENCY (If they have manual loyalty program)
-    // Manual programs capture only 60-70% of potential vs automated (90%+)
-    if (inputs.hasLoyalty === 'yes') {
-      // Manual loyalty programs miss about 15% of potential revenue
-      loyaltyInefficiencyPenalty = totalMonthlyCustomers * 0.15 * inputs.ticketSize;
+    // 3. SYSTEM EFFICIENCY PENALTY
+    // Differentiates between having NO system vs a MANUAL system
+    if (inputs.hasLoyalty === 'no') {
+      // NO SYSTEM: Miss out on data capture and remarketing entirely
+      // Penalty: ~20% additional opportunity cost
+      loyaltyInefficiencyPenalty = totalMonthlyCustomers * 0.20 * inputs.ticketSize;
+    } else if (inputs.hasLoyalty === 'yes') {
+      // MANUAL SYSTEM: Captures data but misses 40-50% of execution
+      // Penalty: ~10% efficiency loss (Better than nothing, but worse than automated)
+      loyaltyInefficiencyPenalty = totalMonthlyCustomers * 0.10 * inputs.ticketSize;
     }
   } else {
     // They have fully automated - if return rate is still low, there's minimal additional opportunity
