@@ -5,9 +5,11 @@
 - ✅ Landing page deployed on Vercel
 - ✅ Lead capture form (name + email)
 - ✅ Form submission API route (`/api/submit-lead`)
-- ✅ Email notification system (Resend)
+- ✅ Admin dashboard at `/admin/leads` to view all leads
 - ✅ Database storage (Vercel KV)
-- ✅ Auto-confirmation emails to leads
+- ✅ Discord webhook notifications (optional)
+- ✅ SEO optimized with Open Graph tags
+- ✅ Custom favicon and branding
 - ✅ All code committed to GitHub
 
 ## 📋 Quick Setup Checklist
