@@ -36,6 +36,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'GreenLoop - Automate Your Restaurant\'s Repeat Revenue',
+        type: 'image/svg+xml',
       },
     ],
   },
@@ -43,7 +44,14 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "GreenLoop | Automate Your Restaurant's Repeat Revenue",
     description: "The Restaurant Repeat Revenue Audit™. Calculate how much repeat revenue you're losing and fix it forever.",
-    images: ['https://greenloop.dev/og-image.svg'],
+    images: [
+      {
+        url: 'https://greenloop.dev/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'GreenLoop - Automate Your Restaurant\'s Repeat Revenue',
+      },
+    ],
     creator: '@greenloop',
   },
   icons: {

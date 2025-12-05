@@ -1,30 +1,44 @@
-# Greenloop Restaurant Landing Page
+# GreenLoop Landing Page
 
-This is the landing page and calculator for the **Restaurant Repeat Revenue Audit™**.
+Landing page for **The Restaurant Repeat Revenue Audit™** - deployed at [greenloop.dev](https://greenloop.dev)
 
 ## 🚀 Quick Start
 
-1.  **Open Terminal** (if not already open).
-2.  Navigate to this folder:
-    ```bash
-    cd landing-page
-    ```
-3.  **Start the site**:
-    ```bash
-    npm run dev
-    ```
-4.  Open your browser to: [http://localhost:3000](http://localhost:3000)
+```bash
+npm install
+npm run dev
+```
 
-## 📁 What's Included
+Visit: [http://localhost:3000](http://localhost:3000)
 
--   **Landing Page**: A high-converting page with the exact copy and flow you designed.
--   **Revenue Calculator**: Fully functional, interactive calculator that estimates lost revenue.
--   **Sales Playbook**: Check `SALES_PLAYBOOK.md` for your outreach scripts and closing process.
+## ✨ Features
 
-## 🛠 Deployment
+- ✅ High-converting landing page with Hormozi principles
+- ✅ Real-time revenue calculator
+- ✅ Lead capture form with Discord notifications
+- ✅ Admin dashboard at `/admin/leads`
+- ✅ Optimized for mobile & social sharing
+- ✅ SEO optimized with Open Graph tags
 
-To put this live on the internet:
+## 📁 Project Structure
 
-1.  Create an account on [Vercel.com](https://vercel.com).
-2.  Install the Vercel CLI or just drag and drop this folder if using their dashboard.
-3.  Or ask me to help you deploy it!
+- `src/app/page.tsx` - Main landing page
+- `src/app/api/submit-lead/route.ts` - Lead submission API
+- `src/app/admin/leads/` - Admin dashboard
+- `SALES_PLAYBOOK.md` - Sales scripts and process
+- `NOTIFICATIONS_AND_EMAIL_GUIDE.md` - Setup guide for notifications
+
+## 🌐 Deployment
+
+- **Live Site**: [greenloop.dev](https://greenloop.dev)
+- **Hosting**: Vercel (auto-deploys from GitHub)
+- **Database**: Vercel KV (Redis)
+- **Notifications**: Discord webhook
+
+## 🔔 Notifications
+
+Discord webhook is configured - you'll get instant notifications when leads submit the form!
+
+## 📧 Email Setup
+
+See `NOTIFICATIONS_AND_EMAIL_GUIDE.md` for branded email setup options.
